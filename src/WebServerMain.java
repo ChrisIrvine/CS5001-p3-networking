@@ -14,7 +14,7 @@ public class WebServerMain {
         if (args == null || args.length == 1 || args.length < 2) {
             System.out.println("Usage: java WebServerMain <document_root> <port>");
             System.exit(1);
-        } else if (dirCheck(args[0]) || portCheck(args[1])) {
+        } else if (dirCheck(args[0]) && portCheck(args[1])) {
             WebServer ws = new WebServer(args[0], Integer.parseInt(args[1]));
         }
     }
@@ -31,6 +31,12 @@ public class WebServerMain {
 
     private static boolean dirCheck(String dir) {
         File dirTest = new File(dir);
-        return dirTest.isDirectory();
+
+        if(dirTest.isDirectory()) {
+            return true;
+        } else {
+            System.out.println(dir + " is not a directory");
+            return false;
+        }
     }
 }

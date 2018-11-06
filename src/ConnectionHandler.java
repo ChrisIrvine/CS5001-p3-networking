@@ -2,41 +2,90 @@ import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
-public class ConnectionHandler {
+class ConnectionHandler {
 
-    private Socket conn;       // socket representing TCP/IP connection to Client
+    static Socket conn;       // socket representing TCP/IP connection to Client
     private InputStream is;    // get data from client on this input stream
     private OutputStream os;   // can send data back to the client on this output stream
-    BufferedReader br;         // use buffered reader to read client data
-    private String dir;        // directory from which files are served
+    private BufferedReader br;         // use buffered reader to read client data
+    static String dir;        // directory from which files are served
 
-    public ConnectionHandler(Socket conn, String dir) {
-        this.conn = conn;
+    ConnectionHandler(Socket conn, String dir) {
+        ConnectionHandler.conn = conn;
+        ConnectionHandler.dir = dir;
         try {
             is = conn.getInputStream();     // get data from client on this input stream
             os = conn.getOutputStream();  // to send data back to the client on this stream
             br = new BufferedReader(new InputStreamReader(is)); // use buffered reader to read client data
-            this.dir = dir;
-            openInitialFile();
         } catch (IOException ioe) {
             System.out.println("ConnectionHandler: " + ioe.getMessage());
         }
     }
 
-    public void openInitialFile() throws IOException {
-        File htmlFile = new File(dir + "index.html");
-        Desktop.getDesktop().browse(htmlFile.toURI());
+    ConnectionHandler() {
     }
 
-    public void handleClientRequest() {
+    void handleClientRequest() {
         System.out.println("new ConnectionHandler constructed .... ");
         try {
             printClientData();
+            String line = br.readLine();
+            if(!line.isEmpty()) { process(line); }
         } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
             System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
             cleanup();     // cleanup and exit
         }
     }
+
+    private void process(String req) {
+        try {
+            if(req.contains("GET")) {
+                //handleGETRequest(req);
+                System.out.println("Sending to get");
+                new GetRequest(req);
+            } else if (req.contains("HEAD")) {
+                handleHEADRequest();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            cleanup();
+        }
+    }
+
+    private void handleHEADRequest() {
+        System.out.println("HEAD found");
+    }
+
+//    private void handleGETRequest(String req) {
+//        try {
+//            int backslash;
+//            int end;
+//            String filepath = dir;
+//
+//            if(req.contains("/")) {
+//                backslash = req.indexOf("/");
+//                end = req.indexOf(" ", backslash);
+//                filepath = req.substring(backslash, end);
+//                System.out.println(filepath);
+//            }
+//
+//            try {
+//                System.out.println(dir + filepath);
+//                File file = new File(dir + filepath);
+//                if(file.isFile()) {
+//                    Desktop.getDesktop().browse(file.toURI());
+//                    //replace with print writer
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                cleanup();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            cleanup();
+//        }
+//
+//    }
 
 
     private void printClientData() throws DisconnectedException, IOException {
