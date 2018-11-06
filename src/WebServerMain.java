@@ -10,11 +10,11 @@ public class WebServerMain {
     }
 
     private static void argsCheck(String[] args) {
-        if(args == null || args.length < 2) {
+        if(args == null || args.length == 1 || args.length < 2) {
             System.out.println("Usage: java WebServerMain <document_root> <port>");
             System.exit(1);
         } else {
-            WebServer ws = new WebServer(args[0], Integer.getInteger(args[1]));
+            WebServer ws = new WebServer(args[0], Integer.parseInt(args[1]));
         }
     }
 }
