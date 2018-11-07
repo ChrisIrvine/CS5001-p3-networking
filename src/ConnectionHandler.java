@@ -28,7 +28,7 @@ class ConnectionHandler {
     void handleClientRequest() {
         System.out.println("new ConnectionHandler constructed .... ");
         try {
-            printClientData();
+            //printClientData();
             String line = br.readLine();
             if(!line.isEmpty()) { process(line); }
         } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
