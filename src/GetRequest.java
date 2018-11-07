@@ -38,6 +38,9 @@ class GetRequest extends ConnectionHandler{
             body = compileBody(reqFile);
             header = compileHeader(body.length);
             sendResponse(header.getBytes(), body);
+        } else {
+            //assume the file was not found, therefore generate 404 response
+
         }
     }
 
