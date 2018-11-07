@@ -80,13 +80,12 @@ class GetRequest extends ConnectionHandler{
     private void sendResponse(byte[] header, byte[] body) {
         try {
             conn.setTcpNoDelay(true);
-            //BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
 
             out.write(header);
             out.write(body);
 
-            out.flush();
+            //out.flush();
             out.close();
         } catch (IOException e) {
             e.printStackTrace();

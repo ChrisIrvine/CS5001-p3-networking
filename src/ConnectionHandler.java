@@ -28,9 +28,9 @@ class ConnectionHandler {
     void handleClientRequest() {
         System.out.println("new ConnectionHandler constructed .... ");
         try {
-            //printClientData();
-            String line = br.readLine();
-            if(!line.isEmpty()) { process(line); }
+            printClientData();
+            //String line = br.readLine();
+            //if(!line.isEmpty()) {  }
         } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
             System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
             cleanup();     // cleanup and exit
@@ -95,6 +95,7 @@ class ConnectionHandler {
             // and shut down the connection on this side cleanly by throwing a DisconnectedException
             // which will be passed up the call stack to the nearest handler (catch block)
             // in the run method
+            process(line);
             if (line == null || line.equals("null") || line.equals(Configuration.exitString)) {
                 throw new DisconnectedException(" ... client has closed the connection ... ");
             }
@@ -102,7 +103,7 @@ class ConnectionHandler {
         }
     }
 
-    private void cleanup() {
+    void cleanup() {
         System.out.println("ConnectionHandler: ... cleaning up and exiting ... ");
         try {
             br.close();
