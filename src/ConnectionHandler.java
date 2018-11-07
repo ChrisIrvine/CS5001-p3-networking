@@ -150,7 +150,7 @@ class ConnectionHandler {
             String line = br.readLine();
             process(line);
             if (line == null || line.equals("null")
-                    || line.equals(Configuration.exitString)) {
+                    || line.equals(Configuration.EXIT_STRING)) {
                 throw new DisconnectedException(" ... client has closed the "
                         + "connection ... ");
             }

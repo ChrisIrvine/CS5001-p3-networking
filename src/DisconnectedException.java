@@ -1,8 +1,14 @@
-public class DisconnectedException extends Exception {
+/**
+ * Class to handle any instances of an unexpected disconnection.
+ */
+class DisconnectedException extends Exception {
 
-    public DisconnectedException(String message) {
+    /**
+     * Method that will take and return a message to return that is the source
+     * of the error.
+     * @param message - exception message
+     */
+    DisconnectedException(String message) {
         super(message);
     }
-
-
 }
