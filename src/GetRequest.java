@@ -6,8 +6,8 @@ class GetRequest extends ConnectionHandler{
     GetRequest(String req) {
         int backslash;
         int end;
-        String filepath = dir;
-        String header = "";
+        String filepath = ConnectionHandler.getDir();
+        String header;
         byte[] body;
 
         if(req.contains("/")) {
@@ -27,45 +27,16 @@ class GetRequest extends ConnectionHandler{
     }
 
     private String compileHeader(int length) {
-//        //byte[] header = req.getBytes();
-//        try {
-//            //BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-//            //out.write(header, 0, header.length);
-//            PrintWriter out = new PrintWriter(conn.getOutputStream());
-//
-//
-//            out.flush();
-//        } catch (IOException e) {
-//            System.out.println("Sending Header issue: " + e.getMessage());
-//        }
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("HTTP/1.1 200 OK\n");
-        sb.append("Server: Simple Java Http Server\n");
-        sb.append("Content-Type: text/html\n"); //find a way to derive this
-        sb.append("Content-Length: ").append(length).append("\n");
-        sb.append("\r\n");
-
-        return sb.toString();
+        final String s = "HTTP/1.1 200 OK\n" +
+                "Server: Simple Java Http Server\n" +
+                "Content-Type: text/html\n" +
+                "Content-Length: " + length + "\n" +
+                "\r\n";
+        return s;
     }
 
     private byte[] compileBody(File reqFile) {
-//        try {
-//            BufferedInputStream in = new BufferedInputStream(new FileInputStream(reqFile));
-//            BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-//            //PrintWriter out = new PrintWriter(conn.getOutputStream());
-//            byte[] buffer = new byte[8192];
-//            int count;
-//
-//            while((count = in.read(buffer)) > 0) {
-//                out.write(buffer, 0, count);
-//            }
-//
-//            in.close();
-//            out.close();
-//        } catch (IOException e) {
-//            System.out.println("Sending Body issue: " + e.getMessage());
-//        }
         byte[] fileContent = null;
 
         try {
@@ -79,13 +50,12 @@ class GetRequest extends ConnectionHandler{
 
     private void sendResponse(byte[] header, byte[] body) {
         try {
-            conn.setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
+            ConnectionHandler.getConn().setTcpNoDelay(true);
+            BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
 
             out.write(header);
             out.write(body);
 
-            //out.flush();
             out.close();
         } catch (IOException e) {
             e.printStackTrace();

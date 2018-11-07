@@ -19,5 +19,4 @@ class WebServer {
             System.out.println("Ooops " + e.getMessage());
         }
     }
-
 }
