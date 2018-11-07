@@ -7,6 +7,8 @@ class GetRequest extends ConnectionHandler{
         int end;
         String filepath = dir;
 
+        sendHeader(req);
+
         if(req.contains("/")) {
             backslash = req.indexOf("/");
             end = req.indexOf(" ", backslash);
@@ -17,26 +19,37 @@ class GetRequest extends ConnectionHandler{
         File reqFile = new File(filepath);
         if (reqFile.isFile()) {
             System.out.println("serving file");
-            handleGetRequest(reqFile);
+            sendBody(reqFile);
         }
     }
 
-    private void handleGetRequest(File reqFile) {
+    private void sendHeader(String req) {
+        byte[] header = req.getBytes();
+        try {
+            BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
+            out.write(header, 0, header.length);
+            out.flush();
+        } catch (IOException e) {
+            System.out.println("Sending Header issue: " + e.getMessage());
+        }
+    }
+
+    private void sendBody(File reqFile) {
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(reqFile));
             BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-            int c;
+            //PrintWriter out = new PrintWriter(conn.getOutputStream());
+            byte[] buffer = new byte[8192];
+            int count;
 
-            System.out.println("copying bytes");
-            while ((c = in.read()) != -1) {
-                out.write(c);
+            while((count = in.read(buffer)) > 0) {
+                out.write(buffer, 0, count);
             }
-            System.out.println("copied bytes");
 
             in.close();
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Sending Body issue: " + e.getMessage());
         }
     }
 }
