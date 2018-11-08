@@ -1,7 +1,11 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.nio.file.Files;
+import java.util.Objects;
 
 /**
  * Class to handle the GET requests for the server, inherits class variables and
@@ -11,6 +15,7 @@ class GetRequest extends ConnectionHandler {
 
     private String root;
 
+
     /**
      * Custom Constructor for the GetRequest class. Will extract the file to GET
      * from the request header, validate the file path and will proceed to
@@ -18,14 +23,17 @@ class GetRequest extends ConnectionHandler {
      * found error.
      * @param req - request for the file
      */
-    GetRequest(String req) {
-        int backslash;
-        int end;
-        String root = ConnectionHandler.getDir();
+    GetRequest(String req) throws IOException {
+        root = ConnectionHandler.getDir();
         File notFound = new File(root + "/404.html");
         byte[] header;
-        String filepath = "";
         byte[] body;
+
+        //String filepath = processReq(req);
+
+        int backslash;
+        int end;
+        String filepath = "";
 
         //Grab the filename from the request
         if (req.contains("/")) {
@@ -33,43 +41,63 @@ class GetRequest extends ConnectionHandler {
             end = req.indexOf(" ", backslash);
             filepath = root + req.substring(backslash, end);
             System.out.println(filepath);
+
         }
 
         //Validate and process request
-        File reqFile = new File(filepath);
+        File reqFile = new File(Objects.requireNonNull(filepath));
         if (reqFile.isFile()) {
             System.out.println("serving file");
             body = compileBody(reqFile);
-            header = compileHeader(true, body.length);
+            header = compileHeader(true, reqFile, body.length);
             sendResponse(header, body);
         } else {
             //assume the file was not found, therefore generate 404 response
             body = compileBody(notFound);
-            header = compileHeader(false, body.length);
+            header = compileHeader(false, reqFile, body.length);
             sendResponse(header, body);
         }
+    }
+
+    private String processReq(String req) {
+        int backslash;
+        int end;
+        String filepath = "";
+
+        //Grab the filename from the request
+        if (req.contains("/")) {
+            backslash = req.indexOf("/");
+            end = req.indexOf(" ", backslash);
+            filepath = root + req.substring(backslash, end);
+            System.out.println(filepath);
+
+        }
+        return filepath;
     }
 
     /**
      * Method to generate the Header response string. Takes the length of the
      * file to GET in bytes.
      *
-     * @param b
+     * @param b - was the file found
+     * @param reqFile - requested file
      * @param length - length of the file in bytes.
      * @return - Header of the response as a String.
      */
-    private byte[] compileHeader(boolean b, int length) {
-
+    private byte[] compileHeader(boolean b, File reqFile, int length)
+            throws IOException {
         if (b) {
             final String s = "HTTP/1.1 200 OK\n"
                     + "Server: Simple Java Http Server\n"
-                    + "Content-Type: text/html\n"
+                    + "Content-Type: "
+                    + Files.probeContentType(reqFile.toPath()) + "\n"
                     + "Content-Length: " + length + "\n\r\n";
             return s.getBytes();
         } else {
             final String s = "HTTP/1.1 404 Not Found\n"
                     + "Server: Simple Java Http Server\n"
-                    + "Content-Type: text/html\n"
+                    + "Content-Type: "
+                    + Files.probeContentType(reqFile.toPath()) + "\n"
                     + "Content-Length: " + length + "\n\r\n";
             return s.getBytes();
         }
@@ -103,7 +131,6 @@ class GetRequest extends ConnectionHandler {
         try {
             ConnectionHandler.getConn().setTcpNoDelay(true);
             BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
-
             System.out.println("sending header");
             out.write(header);
             System.out.println("sending body");
