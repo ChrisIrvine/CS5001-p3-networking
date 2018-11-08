@@ -1,25 +1,38 @@
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
+/**
+ * WebServer class that will listen to the given (or default) port and open up
+ * a new instance of the ConnectionHandler class for each request given to the
+ * server.
+ */
 class WebServer {
+
+    /** Class variable to hold the server side socket. */
     private ServerSocket ss;
 
+    /**
+     * Constructor method for the WebServer object. Takes a string (filepath) to
+     * the directory from which files are served and the port to serve them
+     * upon. Will try to create the ConnectionHandler. Throws IOExceptions.
+     * @param dir - filepath to the server directory
+     * @param port - port to serve the files across
+     */
     WebServer(String dir, int port) {
         try {
             ss = new ServerSocket(port);
-            System.out.println("Server started.... \n" +
-                    "Listening on port " + port + "....");
-            File htmlFile = new File(dir + "index.html");
-            Desktop.getDesktop().browse(htmlFile.toURI());
+            System.out.println("Server started.... \n"
+                    + "Listening on port " + port + "....");
             while (true) {
                 Socket conn = ss.accept();
-                System.out.println("Server got new connection request from " + conn.getInetAddress());
+                System.out.println("Server got new connection request from "
+                        + conn.getInetAddress());
+                ConnectionHandler ch = new ConnectionHandler(conn, dir);
+                ch.handleClientRequest();
             }
         } catch (IOException e) {
             System.out.println("Ooops " + e.getMessage());
         }
     }
-
 }
