@@ -3,15 +3,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+/**
+ * Class to handle the HEAD requests from the client.
+ */
 class HeadRequest {
-    private final String root;
-    private final File notFound;
 
+    /**
+     * Custom constructor that will also generate and send the appropriate
+     * responses to the client.
+     * @param req - requested file
+     */
     HeadRequest(String req) {
         int backslash;
         int end;
-        root = ConnectionHandler.getDir();
-        notFound = new File(root + "/404.html");
+        String root = ConnectionHandler.getDir();
+        File notFound = new File(root + "/404.html");
         byte[] header;
         String filepath = "";
 
@@ -35,6 +41,13 @@ class HeadRequest {
         sendResponse(header);
     }
 
+    /**
+     * Method to compile the appropriate response header to be returned to the
+     * client. Header is returned as a byte array
+     * @param b - boolean representing if the file has been found
+     * @param reqFile - file to get the length of
+     * @return - byte array representing the requested file
+     */
     private byte[] compileHeader(boolean b, File reqFile) {
         int length = findLength(reqFile);
         if (b) {
@@ -52,6 +65,12 @@ class HeadRequest {
         }
     }
 
+    /**
+     * Method to calculate the length of a file when represented as a byte
+     * array.
+     * @param reqFile - requested file to be copied into a byte array
+     * @return - legnth of the requested file as a byte array
+     */
     private int findLength(File reqFile) {
         byte[] fileContent = null;
         try {
@@ -62,10 +81,17 @@ class HeadRequest {
         return fileContent != null ? fileContent.length : 0;
     }
 
+    /**
+     * Method to send the given header response to the client over the
+     * given socket.
+     * @param header - response header
+     */
     private void sendResponse(byte[] header) {
         try {
             ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
+            BufferedOutputStream out = new BufferedOutputStream(
+                    ConnectionHandler.getOs()
+            );
 
             System.out.println("sending header");
             out.write(header);

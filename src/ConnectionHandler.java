@@ -129,7 +129,7 @@ class ConnectionHandler {
                 System.out.println("Sending to HeadRequest.java");
                 new HeadRequest(req);
             } else {
-                new UnknownRequest(req);
+                new UnknownRequest();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,7 +148,7 @@ class ConnectionHandler {
      * connection is closed by the client.
      */
     private void printClientData() throws DisconnectedException, IOException {
-        while (true) {
+        //while (true) {
             String line = br.readLine();
             process(line);
             if (line == null || line.equals("null")
@@ -157,7 +157,7 @@ class ConnectionHandler {
                         + "connection ... ");
             }
             System.out.println("ConnectionHandler: " + line);
-        }
+        //}
     }
 
     /**
