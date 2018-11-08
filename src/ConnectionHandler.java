@@ -123,11 +123,13 @@ class ConnectionHandler {
     private void process(String req) {
         try {
             if (req.contains("GET")) {
-                //handleGETRequest(req);
-                System.out.println("Sending to get");
+                System.out.println("Sending to GetRequest.java");
                 new GetRequest(req);
             } else if (req.contains("HEAD")) {
-                handleHEADRequest();
+                System.out.println("Sending to HeadRequest.java");
+                new HeadRequest(req);
+            } else {
+                new UnknownRequest(req);
             }
         } catch (Exception e) {
             e.printStackTrace();

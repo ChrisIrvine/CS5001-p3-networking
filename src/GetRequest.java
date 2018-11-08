@@ -7,7 +7,9 @@ import java.nio.file.Files;
  * Class to handle the GET requests for the server, inherits class variables and
  * methods from the ConnectionHandler class.
  */
-class GetRequest extends ConnectionHandler{
+class GetRequest extends ConnectionHandler {
+
+    private String root;
 
     /**
      * Custom Constructor for the GetRequest class. Will extract the file to GET
@@ -19,15 +21,16 @@ class GetRequest extends ConnectionHandler{
     GetRequest(String req) {
         int backslash;
         int end;
-        String filepath = ConnectionHandler.getDir();
+        root = ConnectionHandler.getDir();
         String header;
+        String filepath = "";
         byte[] body;
 
         //Grab the filename from the request
         if (req.contains("/")) {
             backslash = req.indexOf("/");
             end = req.indexOf(" ", backslash);
-            filepath += req.substring(backslash, end);
+            filepath = root + req.substring(backslash, end);
             System.out.println(filepath);
         }
 
@@ -40,12 +43,35 @@ class GetRequest extends ConnectionHandler{
             sendResponse(header.getBytes(), body);
         } else {
             //assume the file was not found, therefore generate 404 response
-
+            send404();
         }
     }
 
     /**
-     * Method to generate the Header reponse string. Takes the length of the
+     * Method that is triggered when the requested file cannot be found.
+     * Will redirect the browser to the 404 - file not found - error page.
+     */
+    private void send404() {
+        byte[] fileContent = null;
+
+        try {
+            File notFound = new File(root + "/404.html");
+            fileContent = Files.readAllBytes(notFound.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        assert fileContent != null;
+        final String errorHeader = "HTTP/1.1 404 Not Found\n"
+                + "Server: Simple Java Http Server\n"
+                + "Content-Type: text/html\n"
+                + "Content-Length: " + fileContent.length + "\n\r\n";
+
+        sendResponse(errorHeader.getBytes(), fileContent);
+    }
+
+    /**
+     * Method to generate the Header response string. Takes the length of the
      * file to GET in bytes.
      * @param length - length of the file in bytes.
      * @return - Header of the response as a String.
@@ -54,7 +80,7 @@ class GetRequest extends ConnectionHandler{
         final String s = "HTTP/1.1 200 OK\n"
                 + "Server: Simple Java Http Server\n"
                 + "Content-Type: text/html\n"
-                + "Content-Length: " + length + "\n" + "\r\n";
+                + "Content-Length: " + length + "\n\r\n";
         return s;
     }
 
@@ -88,7 +114,9 @@ class GetRequest extends ConnectionHandler{
             ConnectionHandler.getConn().setTcpNoDelay(true);
             BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
 
+            System.out.println("sending header");
             out.write(header);
+            System.out.println("sending body");
             out.write(body);
 
             out.close();
