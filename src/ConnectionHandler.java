@@ -123,10 +123,8 @@ class ConnectionHandler {
     private void process(String req) {
         try {
             if (req.contains("GET")) {
-                System.out.println("Sending to GetRequest.java");
                 new GetRequest(req);
             } else if (req.contains("HEAD")) {
-                System.out.println("Sending to HeadRequest.java");
                 new HeadRequest(req);
             } else {
                 new UnknownRequest();
@@ -150,6 +148,7 @@ class ConnectionHandler {
     private void printClientData() throws DisconnectedException, IOException {
         //while (true) {
             String line = br.readLine();
+            logging.compileRequest(line);
             process(line);
             if (line == null || line.equals("null")
                     || line.equals(Configuration.EXIT_STRING)) {

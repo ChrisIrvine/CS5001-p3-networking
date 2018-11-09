@@ -26,13 +26,11 @@ class HeadRequest {
             backslash = req.indexOf("/");
             end = req.indexOf(" ", backslash);
             filepath = root + req.substring(backslash, end);
-            System.out.println(filepath);
         }
 
         //Validate and process request
         File reqFile = new File(filepath);
         if (reqFile.isFile()) {
-            System.out.println("serving file");
             header = compileHeader(true, reqFile);
         } else {
             //assume the file was not found, therefore generate 404 response
@@ -92,9 +90,10 @@ class HeadRequest {
             BufferedOutputStream out = new BufferedOutputStream(
                     ConnectionHandler.getOs()
             );
-
-            System.out.println("sending header");
             out.write(header);
+
+            logging.compileResponse(header, new byte[0]);
+            logging.writeToLog();
 
             out.close();
         } catch (IOException e) {

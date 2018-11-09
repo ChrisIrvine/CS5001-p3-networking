@@ -63,8 +63,10 @@ class UnknownRequest {
             ConnectionHandler.getConn().setTcpNoDelay(true);
             BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
 
-            System.out.println("sending header");
             out.write(header);
+
+            logging.compileResponse(header, new byte[0]);
+            logging.writeToLog();
 
             out.close();
         } catch (IOException e) {

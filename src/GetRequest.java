@@ -1,6 +1,3 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.BufferedOutputStream;
@@ -40,14 +37,12 @@ class GetRequest extends ConnectionHandler {
             backslash = req.indexOf("/");
             end = req.indexOf(" ", backslash);
             filepath = root + req.substring(backslash, end);
-            System.out.println(filepath);
 
         }
 
         //Validate and process request
         File reqFile = new File(Objects.requireNonNull(filepath));
         if (reqFile.isFile()) {
-            System.out.println("serving file");
             body = compileBody(reqFile);
             header = compileHeader(true, reqFile, body.length);
             sendResponse(header, body);
@@ -59,21 +54,20 @@ class GetRequest extends ConnectionHandler {
         }
     }
 
-    private String processReq(String req) {
-        int backslash;
-        int end;
-        String filepath = "";
-
-        //Grab the filename from the request
-        if (req.contains("/")) {
-            backslash = req.indexOf("/");
-            end = req.indexOf(" ", backslash);
-            filepath = root + req.substring(backslash, end);
-            System.out.println(filepath);
-
-        }
-        return filepath;
-    }
+//    private String processReq(String req) {
+//        int backslash;
+//        int end;
+//        String filepath = "";
+//
+//        //Grab the filename from the request
+//        if (req.contains("/")) {
+//            backslash = req.indexOf("/");
+//            end = req.indexOf(" ", backslash);
+//            filepath = root + req.substring(backslash, end);
+//
+//        }
+//        return filepath;
+//    }
 
     /**
      * Method to generate the Header response string. Takes the length of the
@@ -130,12 +124,15 @@ class GetRequest extends ConnectionHandler {
     private void sendResponse(byte[] header, byte[] body) {
         try {
             ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
-            System.out.println("sending header");
+            BufferedOutputStream out = new BufferedOutputStream(
+                    ConnectionHandler.getOs()
+            );
             out.write(header);
-            System.out.println("sending body");
             out.write(body);
 
+            logging.compileResponse(header, body);
+
+            logging.writeToLog();
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
