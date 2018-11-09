@@ -159,25 +159,20 @@ class ConnectionHandler implements Runnable{
      * connection is closed by the client.
      */
     private void printClientData() throws DisconnectedException, IOException {
-        //while (true) {
-            String line = br.readLine();
-            logging.compileRequest(line);
-            byte[] response = process(line);
+        String line = br.readLine();
+        logging.compileRequest(line);
+        byte[] response = process(line);
 
-            //sendResponse(response);
-
-            os.write(response);
-
-            os.flush();
-            os.close();
-            if (line == null || line.equals("null")
-                    || line.equals(Configuration.EXIT_STRING)) {
-                throw new DisconnectedException(" ... client has closed the "
-                        + "connection ... ");
-            }
-            System.out.println("ConnectionHandler: " + line);
-            //System.out.println(new String(response, Configuration.ENCODING));
-        //}
+        os.write(response);
+        os.flush();
+        os.close();
+        
+        if (line == null || line.equals("null")
+                || line.equals(Configuration.EXIT_STRING)) {
+            throw new DisconnectedException(" ... client has closed the "
+                    + "connection ... ");
+        }
+        System.out.println("ConnectionHandler: " + line);
     }
 
     /**
@@ -195,29 +190,4 @@ class ConnectionHandler implements Runnable{
             System.out.println("ConnectionHandler:cleanup " + ioe.getMessage());
         }
     }
-
-    /**
-     * Send the Header and Body of the GET request response, as a streams of
-     * bytes. Catches IOExceptions.
-     * @param response - response as a byte array
-     */
-    private void sendResponse(byte[] response) {
-        try {
-            //ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(
-                    ConnectionHandler.getOs()
-            );
-            out.write(response);
-            out.flush();
-            out.close();
-
-            logging.compileResponse(response);
-
-            logging.writeToLog();
-            //out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

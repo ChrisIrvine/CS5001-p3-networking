@@ -49,4 +49,31 @@ abstract class Request {
             return s.getBytes();
         }
     }
+
+    /**
+     * Method to translate the file that was requested into an array of bytes.
+     * Catches IOExceptions.
+     * @param reqFile - requested file
+     * @return - requested file as a byte array
+     */
+    static byte[] compileBody(File reqFile) {
+        byte[] fileContent = null;
+
+        try {
+            fileContent = Files.readAllBytes(reqFile.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return fileContent;
+    }
+
+    static byte[] compileResponse(byte[] header, byte[] body) {
+        byte[] response = new byte[header.length + body.length];
+
+        System.arraycopy(header, 0, response, 0, header.length);
+        System.arraycopy(body, 0, response, header.length, body.length);
+
+        return response;
+    }
 }
