@@ -17,5 +17,7 @@ abstract class Configuration {
     static final Charset ENCODING = StandardCharsets.UTF_8;
     /** Breaker string. */
     static final String BREAKER = "===========================================";
+    /** Maximum number of threads allowed. */
+    static final int MAX_THREAD = 5;
 
 }

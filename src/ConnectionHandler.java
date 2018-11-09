@@ -1,4 +1,8 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -6,7 +10,7 @@ import java.net.Socket;
  * browser. Will pass the request on to either a GetRequest object or a
  * HeadRequest object, depending on the type of request.
  */
-class ConnectionHandler implements Runnable{
+class ConnectionHandler implements Runnable {
 
     /** socket representing TCP/IP connection to Client. */
     private static Socket conn;
@@ -131,15 +135,15 @@ class ConnectionHandler implements Runnable{
     private byte[] process(String req) {
         try {
             if (req.contains("GET")) {
-                GetRequest gh = new GetRequest(req);
+                GetRequest gr = new GetRequest(req);
 
-                return gh.compileResponse(gh.header, gh.body);
+                return Request.compileResponse(gr.getHeader(), gr.getBody());
             } else if (req.contains("HEAD")) {
-                new HeadRequest(req);
-                return new byte[0];
+                HeadRequest hr = new HeadRequest(req);
+                return Request.compileResponse(hr.getHeader(), new byte[0]);
             } else {
                 UnknownRequest ur = new UnknownRequest();
-                return ur.compileResponse(ur.header, ur.body);
+                return Request.compileResponse(ur.getHeader(), new byte[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,7 +170,7 @@ class ConnectionHandler implements Runnable{
         os.write(response);
         os.flush();
         os.close();
-        
+
         if (line == null || line.equals("null")
                 || line.equals(Configuration.EXIT_STRING)) {
             throw new DisconnectedException(" ... client has closed the "

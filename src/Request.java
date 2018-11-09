@@ -76,4 +76,20 @@ abstract class Request {
 
         return response;
     }
+
+    /**
+     * Method to calculate the length of a file when represented as a byte
+     * array.
+     * @param reqFile - requested file to be copied into a byte array
+     * @return - legnth of the requested file as a byte array
+     */
+    static int findLength(File reqFile) {
+        byte[] fileContent = null;
+        try {
+            fileContent = Files.readAllBytes(reqFile.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileContent != null ? fileContent.length : 0;
+    }
 }

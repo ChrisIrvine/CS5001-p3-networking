@@ -1,8 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.io.BufferedOutputStream;
-import java.nio.file.Files;
-import java.util.Objects;
 
 /**
  * Class to handle the GET requests for the server, inherits class variables and
@@ -10,8 +7,8 @@ import java.util.Objects;
  */
 class GetRequest extends ConnectionHandler {
 
-    public byte[] body;
-    byte[] header;
+    private byte[] body;
+    private byte[] header;
 
 
     /**
@@ -38,13 +35,11 @@ class GetRequest extends ConnectionHandler {
         }
     }
 
-    
-    byte[] compileResponse(byte[] header, byte[] body) {
-        byte[] response = new byte[header.length + body.length];
+    public byte[] getBody() {
+        return body;
+    }
 
-        System.arraycopy(header, 0, response, 0, header.length);
-        System.arraycopy(body, 0, response, header.length, body.length);
-        
-        return response;
+    byte[] getHeader() {
+        return header;
     }
 }
