@@ -1,8 +1,10 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -99,20 +101,6 @@ class ConnectionHandler implements Runnable {
     public void setOs(OutputStream os) {
         ConnectionHandler.os = os;
     }
-    /**
-     * Package-private method that will handle the client request. Will try to
-     * execute a method that will deal with the request. Will throw an exception
-     * and clean up should there be an exception whilst handling the request.
-     */
-    void handleClientRequest() {
-        System.out.println("new ConnectionHandler constructed .... ");
-        try {
-            printClientData();
-        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
-            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
-            //cleanup();     // cleanup and exit
-        }
-    }
 
     @Override
     public void run() {
@@ -152,11 +140,6 @@ class ConnectionHandler implements Runnable {
         return new byte[0];
     }
 
-    //delete this
-    private void handleHEADRequest() {
-        System.out.println("HEAD found");
-    }
-
     /**
      * Private method that will send the client data to be processed and will
      * throw a DisconnectedException should there be an unexpected issue or the
@@ -167,9 +150,24 @@ class ConnectionHandler implements Runnable {
         logging.compileRequest(line);
         byte[] response = process(line);
 
+        //send response
         os.write(response);
         os.flush();
         os.close();
+
+        //compile response and request for log
+        logging.compileRequest(line);
+        logging.compileResponse(response);
+
+        //write log
+        PrintWriter logger = new PrintWriter(new FileWriter(Configuration.LOG_FILE, true));
+
+        logger.write(logging.getRequest());
+        logger.write(logging.getResponse());
+
+        //close log
+        logger.flush();
+        logger.close();
 
         if (line == null || line.equals("null")
                 || line.equals(Configuration.EXIT_STRING)) {
