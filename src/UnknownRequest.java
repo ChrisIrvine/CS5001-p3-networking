@@ -13,15 +13,17 @@ class UnknownRequest {
      * safety.
      */
     private final File notFound;
+    public byte[] body;
+    public byte[] header;
 
     /**
      * Custom constructor for the UknownRequest object.
      */
     UnknownRequest() {
         notFound = new File(ConnectionHandler.getDir() + "/404.html");
-        byte[] header;
-        header = compileHeader();
-        sendResponse(header);
+        this.body = new byte[1];
+        this.header = compileHeader();
+        //sendResponse(header);
     }
 
     /**
@@ -53,24 +55,35 @@ class UnknownRequest {
         return fileContent != null ? fileContent.length : 0;
     }
 
-    /**
-     * Method to send the given header response to the client over the
-     * given socket.
-     * @param header - response header
-     */
-    private void sendResponse(byte[] header) {
-        try {
-            ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
+    byte[] compileResponse(byte[] header, byte[] body) {
+        byte[] response = new byte[header.length + body.length];
 
-            out.write(header);
-
-            logging.compileResponse(header, new byte[0]);
-            logging.writeToLog();
-
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        System.arraycopy(header, 0, response, 0, header.length);
+        if (body.length > 1) {
+            System.arraycopy(body, 0, response, header.length, body.length);
         }
+
+        return response;
     }
+
+//    /**
+//     * Method to send the given header response to the client over the
+//     * given socket.
+//     * @param header - response header
+//     */
+//    private void sendResponse(byte[] header) {
+//        try {
+//            ConnectionHandler.getConn().setTcpNoDelay(true);
+//            BufferedOutputStream out = new BufferedOutputStream(ConnectionHandler.getOs());
+//
+//            out.write(header);
+//
+//            logging.compileResponse(header, new byte[0]);
+//            logging.writeToLog();
+//
+//            out.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
