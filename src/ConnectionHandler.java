@@ -10,7 +10,7 @@ import java.net.Socket;
  * browser. Will pass the request on to either a GetRequest object or a
  * HeadRequest object, depending on the type of request.
  */
-class ConnectionHandler {
+class ConnectionHandler {//implements Runnable{
 
     /** socket representing TCP/IP connection to Client. */
     private static Socket conn;
@@ -22,6 +22,7 @@ class ConnectionHandler {
     private BufferedReader br;
     /** directory from which files are served. */
     private static String dir;
+    private static String name;
 
     /**
      * Custom constructor for the ConnectionHandler class, takes a socket
@@ -113,7 +114,10 @@ class ConnectionHandler {
             cleanup();     // cleanup and exit
         }
     }
-
+//    @Override
+//    public void run() {
+//
+//    }
     /**
      * Private method that will send the request to a GetRequest or HeadRequest
      * object depending on the header of the request. Throws exceptions if there
@@ -174,4 +178,6 @@ class ConnectionHandler {
             System.out.println("ConnectionHandler:cleanup " + ioe.getMessage());
         }
     }
+
+
 }

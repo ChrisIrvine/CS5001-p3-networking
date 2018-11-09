@@ -2,7 +2,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * WebServer class that will listen to the given (or default) port and open up
@@ -13,7 +14,8 @@ class WebServer {
 
     /** Class variable to hold the server side socket. */
     private ServerSocket ss;
-    private Random r = new Random();
+    //private Random r = new Random();
+    private ExecutorService pool = Executors.newFixedThreadPool(5);
 
     /**
      * Constructor method for the WebServer object. Takes a string (filepath) to
@@ -31,7 +33,15 @@ class WebServer {
                 Socket conn = ss.accept();
                 System.out.println("Server got new connection request from "
                         + (Objects.requireNonNull(conn).getInetAddress()));
-                new ConnectionThread(conn, dir, "Thread " + r.nextInt(10));
+
+                ConnectionHandler ch = new ConnectionHandler(conn, dir);
+                ch.handleClientRequest();
+//                Runnable ch = new ConnectionHandler(conn, dir);
+//                pool.execute(ch);
+//
+//                pool.shutdown();
+//                while(!pool.isTerminated()){ }
+
             }
         } catch (IOException e) {
             System.out.println("Ooops " + e.getMessage());
