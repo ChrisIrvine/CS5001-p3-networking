@@ -22,7 +22,6 @@ class ConnectionHandler {//implements Runnable{
     private BufferedReader br;
     /** directory from which files are served. */
     private static String dir;
-    private static String name;
 
     /**
      * Custom constructor for the ConnectionHandler class, takes a socket
@@ -116,7 +115,13 @@ class ConnectionHandler {//implements Runnable{
     }
 //    @Override
 //    public void run() {
-//
+//          System.out.println("new ConnectionHandler constructed .... ");
+//        try {
+//            printClientData();
+//        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
+//            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
+//            cleanup();     // cleanup and exit
+//        }
 //    }
     /**
      * Private method that will send the request to a GetRequest or HeadRequest

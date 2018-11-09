@@ -14,8 +14,7 @@ class WebServer {
 
     /** Class variable to hold the server side socket. */
     private ServerSocket ss;
-    //private Random r = new Random();
-    private ExecutorService pool = Executors.newFixedThreadPool(5);
+    //private ExecutorService pool = Executors.newFixedThreadPool(5);
 
     /**
      * Constructor method for the WebServer object. Takes a string (filepath) to
