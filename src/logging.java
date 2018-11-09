@@ -31,19 +31,18 @@ abstract class logging {
      * for the log file, incorporating date and time of the response. If the
      * response only contains a header, the body is ignored during compilation.
      * @param header - response header to log
-     * @param body - response body to log (may not be present)
      */
-    static void compileResponse(byte[] header, byte[] body) {
+    static void compileResponse(byte[] header) {
         String responseHeader = new String(header, Configuration.ENCODING);
-        String responseBody = new String(body, Configuration.ENCODING);
+        //String responseBody = new String(body, Configuration.ENCODING);
 
-        if (body.length > 1) {
-            logging.response = "Response...\nHeader: \n" + responseHeader
-                    + "Body: \n" + responseBody + "\nAt: " + compileDateTime();
-        } else {
+//        if (body.length > 1) {
+//            logging.response = "Response...\nHeader: \n" + responseHeader
+//                    + "Body: \n" + responseBody + "\nAt: " + compileDateTime();
+//        } else {
             logging.response = "Response...\nHeader: \n" + responseHeader
                     + "At: " + compileDateTime();
-        }
+
     }
 
     /**
@@ -67,11 +66,11 @@ abstract class logging {
         try {
             PrintWriter out = new PrintWriter(new FileWriter(log, true));
 
-            out.append(request);
+            //out.append(request);
             out.append(response);
             out.append(Configuration.BREAKER + Configuration.BREAKER + "\n");
 
-            out.close();
+            //out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

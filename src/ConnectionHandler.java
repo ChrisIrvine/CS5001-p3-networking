@@ -1,8 +1,4 @@
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -10,7 +6,7 @@ import java.net.Socket;
  * browser. Will pass the request on to either a GetRequest object or a
  * HeadRequest object, depending on the type of request.
  */
-class ConnectionHandler {
+class ConnectionHandler implements Runnable{
 
     /** socket representing TCP/IP connection to Client. */
     private static Socket conn;
@@ -110,7 +106,19 @@ class ConnectionHandler {
             printClientData();
         } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
             System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
-            cleanup();     // cleanup and exit
+            //cleanup();     // cleanup and exit
+        }
+    }
+
+    @Override
+    public void run() {
+          System.out.println("new ConnectionHandler constructed .... ");
+        try {
+            printClientData();
+        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
+            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
+        } finally {
+            cleanup();
         }
     }
 
@@ -120,19 +128,24 @@ class ConnectionHandler {
      * is an issue.
      * @param req - header of the request to be processed
      */
-    private void process(String req) {
+    private byte[] process(String req) {
         try {
             if (req.contains("GET")) {
-                new GetRequest(req);
+                GetRequest gh = new GetRequest(req);
+
+                return gh.compileResponse(gh.header, gh.body);
             } else if (req.contains("HEAD")) {
                 new HeadRequest(req);
+                return new byte[0];
             } else {
-                new UnknownRequest();
+                UnknownRequest ur = new UnknownRequest();
+                return ur.compileResponse(ur.header, ur.body);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            cleanup();
+            //cleanup();
         }
+        return new byte[0];
     }
 
     //delete this
@@ -149,13 +162,21 @@ class ConnectionHandler {
         //while (true) {
             String line = br.readLine();
             logging.compileRequest(line);
-            process(line);
+            byte[] response = process(line);
+
+            //sendResponse(response);
+
+            os.write(response);
+
+            os.flush();
+            os.close();
             if (line == null || line.equals("null")
                     || line.equals(Configuration.EXIT_STRING)) {
                 throw new DisconnectedException(" ... client has closed the "
                         + "connection ... ");
             }
             System.out.println("ConnectionHandler: " + line);
+            //System.out.println(new String(response, Configuration.ENCODING));
         //}
     }
 
@@ -174,4 +195,29 @@ class ConnectionHandler {
             System.out.println("ConnectionHandler:cleanup " + ioe.getMessage());
         }
     }
+
+    /**
+     * Send the Header and Body of the GET request response, as a streams of
+     * bytes. Catches IOExceptions.
+     * @param response - response as a byte array
+     */
+    private void sendResponse(byte[] response) {
+        try {
+            //ConnectionHandler.getConn().setTcpNoDelay(true);
+            BufferedOutputStream out = new BufferedOutputStream(
+                    ConnectionHandler.getOs()
+            );
+            out.write(response);
+            out.flush();
+            out.close();
+
+            logging.compileResponse(response);
+
+            logging.writeToLog();
+            //out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

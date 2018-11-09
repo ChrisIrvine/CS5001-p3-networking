@@ -92,7 +92,7 @@ class HeadRequest {
             );
             out.write(header);
 
-            logging.compileResponse(header, new byte[0]);
+            logging.compileResponse(header);
             logging.writeToLog();
 
             out.close();
