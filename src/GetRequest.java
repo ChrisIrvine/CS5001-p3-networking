@@ -33,23 +33,18 @@ class GetRequest extends ConnectionHandler {
         String filepath = "";
 
         //Grab the filename from the request
-        if (req.contains("/")) {
-            backslash = req.indexOf("/");
-            end = req.indexOf(" ", backslash);
-            filepath = root + req.substring(backslash, end);
-
-        }
+        File reqFile = Request.grabFile(req);
 
         //Validate and process request
-        File reqFile = new File(Objects.requireNonNull(filepath));
+        //File reqFile = new File(Objects.requireNonNull(filepath));
         if (reqFile.isFile()) {
             body = compileBody(reqFile);
-            header = compileHeader(true, reqFile, body.length);
+            header = Request.compileHeader(true, reqFile, body.length);
             sendResponse(header, body);
         } else {
             //assume the file was not found, therefore generate 404 response
             body = compileBody(notFound);
-            header = compileHeader(false, reqFile, body.length);
+            header = Request.compileHeader(false, reqFile, body.length);
             sendResponse(header, body);
         }
     }
@@ -69,33 +64,33 @@ class GetRequest extends ConnectionHandler {
 //        return filepath;
 //    }
 
-    /**
-     * Method to generate the Header response string. Takes the length of the
-     * file to GET in bytes.
-     *
-     * @param b - was the file found
-     * @param reqFile - requested file
-     * @param length - length of the file in bytes.
-     * @return - Header of the response as a String.
-     */
-    private byte[] compileHeader(boolean b, File reqFile, int length)
-            throws IOException {
-        if (b) {
-            final String s = "HTTP/1.1 200 OK\n"
-                    + "Server: Simple Java Http Server\n"
-                    + "Content-Type: "
-                    + Files.probeContentType(reqFile.toPath()) + "\n"
-                    + "Content-Length: " + length + "\n\r\n";
-            return s.getBytes();
-        } else {
-            final String s = "HTTP/1.1 404 Not Found\n"
-                    + "Server: Simple Java Http Server\n"
-                    + "Content-Type: "
-                    + Files.probeContentType(reqFile.toPath()) + "\n"
-                    + "Content-Length: " + length + "\n\r\n";
-            return s.getBytes();
-        }
-    }
+//    /**
+//     * Method to generate the Header response string. Takes the length of the
+//     * file to GET in bytes.
+//     *
+//     * @param b - was the file found
+//     * @param reqFile - requested file
+//     * @param length - length of the file in bytes.
+//     * @return - Header of the response as a String.
+//     */
+//    private byte[] compileHeader(boolean b, File reqFile, int length)
+//            throws IOException {
+//        if (b) {
+//            final String s = "HTTP/1.1 200 OK\n"
+//                    + "Server: Simple Java Http Server\n"
+//                    + "Content-Type: "
+//                    + Files.probeContentType(reqFile.toPath()) + "\n"
+//                    + "Content-Length: " + length + "\n\r\n";
+//            return s.getBytes();
+//        } else {
+//            final String s = "HTTP/1.1 404 Not Found\n"
+//                    + "Server: Simple Java Http Server\n"
+//                    + "Content-Type: "
+//                    + Files.probeContentType(reqFile.toPath()) + "\n"
+//                    + "Content-Length: " + length + "\n\r\n";
+//            return s.getBytes();
+//        }
+//    }
 
     /**
      * Method to translate the file that was requested into an array of bytes.
