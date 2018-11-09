@@ -11,6 +11,8 @@ import java.util.Objects;
 class GetRequest extends ConnectionHandler {
 
     private String root;
+    public byte[] body;
+    public byte[] header;
 
 
     /**
@@ -24,7 +26,7 @@ class GetRequest extends ConnectionHandler {
         root = ConnectionHandler.getDir();
         File notFound = new File(root + "/404.html");
         byte[] header;
-        byte[] body;
+        byte[] body = new byte[0];
 
         //String filepath = processReq(req);
 
@@ -43,14 +45,15 @@ class GetRequest extends ConnectionHandler {
         //Validate and process request
         File reqFile = new File(Objects.requireNonNull(filepath));
         if (reqFile.isFile()) {
-            body = compileBody(reqFile);
-            header = compileHeader(true, reqFile, body.length);
-            sendResponse(header, body);
+            this.body = compileBody(reqFile);
+            //System.out.println(new String(this.body, Configuration.ENCODING));
+            this.header = compileHeader(true, reqFile, this.body.length);
+            //sendResponse(header, body);
         } else {
             //assume the file was not found, therefore generate 404 response
-            body = compileBody(notFound);
-            header = compileHeader(false, reqFile, body.length);
-            sendResponse(header, body);
+            this.body = compileBody(notFound);
+            this.header = compileHeader(false, reqFile, body.length);
+            //sendResponse(header, body);
         }
     }
 
@@ -114,28 +117,37 @@ class GetRequest extends ConnectionHandler {
 
         return fileContent;
     }
+    
+    byte[] compileResponse(byte[] header, byte[] body) {
+        byte[] response = new byte[header.length + body.length];
 
-    /**
-     * Send the Header and Body of the GET request response, as a streams of
-     * bytes. Catches IOExceptions.
-     * @param header - Header of the response as a byte array
-     * @param body - Body of the response as a byte array
-     */
-    private void sendResponse(byte[] header, byte[] body) {
-        try {
-            ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(
-                    ConnectionHandler.getOs()
-            );
-            out.write(header);
-            out.write(body);
-
-            logging.compileResponse(header, body);
-
-            logging.writeToLog();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.arraycopy(header, 0, response, 0, header.length);
+        System.arraycopy(body, 0, response, header.length, body.length);
+        
+        return response;
     }
+
+//    /**
+//     * Send the Header and Body of the GET request response, as a streams of
+//     * bytes. Catches IOExceptions.
+//     * @param header - Header of the response as a byte array
+//     * @param body - Body of the response as a byte array
+//     */
+//    private void sendResponse(byte[] header, byte[] body) {
+//        try {
+//            ConnectionHandler.getConn().setTcpNoDelay(true);
+//            BufferedOutputStream out = new BufferedOutputStream(
+//                    ConnectionHandler.getOs()
+//            );
+//            out.write(header);
+//            out.write(body);
+//
+//            logging.compileResponse(header, body);
+//
+//            logging.writeToLog();
+//            //out.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
