@@ -1,7 +1,3 @@
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -11,10 +7,11 @@ import java.time.format.DateTimeFormatter;
  */
 abstract class logging {
 
-    private static File log = new File(Configuration.LOG_FILE);
     private static String request = "";
     private static String response = "";
-    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern(
+            "dd/MM/yyyy HH:mm:ss"
+    );
 
     /**
      * Method to compile the Client request string into a readable format for
@@ -34,15 +31,8 @@ abstract class logging {
      */
     static void compileResponse(byte[] header) {
         String responseHeader = new String(header, Configuration.ENCODING);
-        //String responseBody = new String(body, Configuration.ENCODING);
-
-//        if (body.length > 1) {
-//            logging.response = "Response...\nHeader: \n" + responseHeader
-//                    + "Body: \n" + responseBody + "\nAt: " + compileDateTime();
-//        } else {
-            logging.response = "Response...\nHeader: \n" + responseHeader
-                    + "At: " + compileDateTime();
-
+        logging.response = "Response...\nHeader: \n" + responseHeader
+                + "At: " + compileDateTime();
     }
 
     /**
@@ -56,23 +46,19 @@ abstract class logging {
     }
 
     /**
-     * Method to write the compiled request and response strings into the
-     * predesignated log file. Uses PrintWriter for ease and will close the
-     * connection into the log file upon job completion.
-     *
-     * Includes IOException catching.
+     * Return the client request String for the log.
+     * @return - client request String
      */
-    static void writeToLog() {
-        try {
-            PrintWriter out = new PrintWriter(new FileWriter(log, true));
+    static String getRequest() {
+        return request;
+    }
 
-            //out.append(request);
-            out.append(response);
-            out.append(Configuration.BREAKER + Configuration.BREAKER + "\n");
 
-            //out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Return the server response String for the log.
+     * @return - server response String
+     */
+    static String getResponse() {
+        return response;
     }
 }

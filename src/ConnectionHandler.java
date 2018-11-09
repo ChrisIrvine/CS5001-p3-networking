@@ -1,4 +1,10 @@
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -6,17 +12,12 @@ import java.net.Socket;
  * browser. Will pass the request on to either a GetRequest object or a
  * HeadRequest object, depending on the type of request.
  */
-class ConnectionHandler implements Runnable{
+class ConnectionHandler implements Runnable {
 
-    /** socket representing TCP/IP connection to Client. */
     private static Socket conn;
-    /** get data from client on this input stream. */
     private InputStream is;
-    /** can send data back to the client on this output stream. */
     private static OutputStream os;
-    /** use buffered reader to read client data. */
     private BufferedReader br;
-    /** directory from which files are served. */
     private static String dir;
 
     /**
@@ -95,28 +96,21 @@ class ConnectionHandler implements Runnable{
     public void setOs(OutputStream os) {
         ConnectionHandler.os = os;
     }
-    /**
-     * Package-private method that will handle the client request. Will try to
-     * execute a method that will deal with the request. Will throw an exception
-     * and clean up should there be an exception whilst handling the request.
-     */
-    void handleClientRequest() {
-        System.out.println("new ConnectionHandler constructed .... ");
-        try {
-            printClientData();
-        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
-            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
-            //cleanup();     // cleanup and exit
-        }
-    }
 
+    /**
+     * Runnable method for the ConnectionHandler class, triggers the
+     * printClientData() method. Will cleanup the socket upon the thread ending.
+     */
     @Override
     public void run() {
           System.out.println("new ConnectionHandler constructed .... ");
         try {
             printClientData();
-        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
-            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
+        } catch (Exception e) {
+            // exit cleanly for any Exception (including IOException,
+            // ClientDisconnectedException)
+            System.out.println("ConnectionHandler.handleClientRequest: "
+                    + e.getMessage());
         } finally {
             cleanup();
         }
@@ -131,15 +125,15 @@ class ConnectionHandler implements Runnable{
     private byte[] process(String req) {
         try {
             if (req.contains("GET")) {
-                GetRequest gh = new GetRequest(req);
+                GetRequest gr = new GetRequest(req);
 
-                return gh.compileResponse(gh.header, gh.body);
+                return Request.compileResponse(gr.getHeader(), gr.getBody());
             } else if (req.contains("HEAD")) {
-                new HeadRequest(req);
-                return new byte[0];
+                HeadRequest hr = new HeadRequest(req);
+                return Request.compileResponse(hr.getHeader(), new byte[0]);
             } else {
                 UnknownRequest ur = new UnknownRequest();
-                return ur.compileResponse(ur.header, ur.body);
+                return Request.compileResponse(ur.getHeader(), new byte[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,36 +142,45 @@ class ConnectionHandler implements Runnable{
         return new byte[0];
     }
 
-    //delete this
-    private void handleHEADRequest() {
-        System.out.println("HEAD found");
-    }
-
     /**
-     * Private method that will send the client data to be processed and will
-     * throw a DisconnectedException should there be an unexpected issue or the
-     * connection is closed by the client.
+     * Private method that effectively powers each request that is sent to the
+     * server. The first line of the request to the server is extracted and sent
+     * for processing, with different actions taken depending on a GET, HEAD or
+     * unknown request type (see process()). Once the server response has been
+     * compiled, the request and log is compiled and written.
      */
     private void printClientData() throws DisconnectedException, IOException {
-        //while (true) {
-            String line = br.readLine();
-            logging.compileRequest(line);
-            byte[] response = process(line);
+        String line = br.readLine();
+        logging.compileRequest(line); //compile the request for the log
+        byte[] response = process(line);
 
-            //sendResponse(response);
+        //send response
+        os.write(response);
+        os.flush();
+        os.close();
 
-            os.write(response);
+        //compile response for the log
+        logging.compileResponse(response);
 
-            os.flush();
-            os.close();
-            if (line == null || line.equals("null")
-                    || line.equals(Configuration.EXIT_STRING)) {
-                throw new DisconnectedException(" ... client has closed the "
-                        + "connection ... ");
-            }
-            System.out.println("ConnectionHandler: " + line);
-            //System.out.println(new String(response, Configuration.ENCODING));
-        //}
+        //write log
+        PrintWriter logger = new PrintWriter(new FileWriter(
+                Configuration.LOG_FILE, true
+        ));
+
+        logger.write(logging.getRequest());
+        logger.write(logging.getResponse());
+        logger.write(Configuration.BREAKER + Configuration.BREAKER);
+
+        //close log
+        logger.flush();
+        logger.close();
+
+        if (line == null || line.equals("null")
+                || line.equals(Configuration.EXIT_STRING)) {
+            throw new DisconnectedException(" ... client has closed the "
+                    + "connection ... ");
+        }
+        System.out.println("ConnectionHandler: " + line);
     }
 
     /**
@@ -186,7 +189,7 @@ class ConnectionHandler implements Runnable{
      * should there be one, printed out to the console.
      */
     private void cleanup() {
-        System.out.println("ConnectionHandler: ... cleaning up and exiting ... ");
+        System.out.println("ConnectionHandler: ... cleaning up and exiting ...");
         try {
             br.close();
             is.close();
@@ -195,29 +198,4 @@ class ConnectionHandler implements Runnable{
             System.out.println("ConnectionHandler:cleanup " + ioe.getMessage());
         }
     }
-
-    /**
-     * Send the Header and Body of the GET request response, as a streams of
-     * bytes. Catches IOExceptions.
-     * @param response - response as a byte array
-     */
-    private void sendResponse(byte[] response) {
-        try {
-            //ConnectionHandler.getConn().setTcpNoDelay(true);
-            BufferedOutputStream out = new BufferedOutputStream(
-                    ConnectionHandler.getOs()
-            );
-            out.write(response);
-            out.flush();
-            out.close();
-
-            logging.compileResponse(response);
-
-            logging.writeToLog();
-            //out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

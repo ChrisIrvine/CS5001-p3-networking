@@ -15,6 +15,6 @@ public class ClientMain {
             System.out.println("Usage: ClientMain <hostname>");
             System.exit(1);
         }
-        Client c = new Client(args[0], Configuration.DEFAULT_PORT);
+        new Client(args[0], Configuration.DEFAULT_PORT);
     }
 }

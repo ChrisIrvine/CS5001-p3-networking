@@ -28,7 +28,7 @@ class WebServer {
             ss = new ServerSocket(port);
             System.out.println("Server started.... \n"
                     + "Listening on port " + port + "....");
-            pool = Executors.newFixedThreadPool(5);
+            pool = Executors.newFixedThreadPool(Configuration.MAX_THREAD);
             while (true) {
                 Socket conn = ss.accept();
                 System.out.println("Server got new connection request from "
