@@ -32,6 +32,10 @@ class UnknownRequest {
         return s.getBytes();
     }
 
+    /**
+     * Method to return the response header.
+     * @return - byte array representation of the response header string
+     */
     byte[] getHeader() {
         return header;
     }

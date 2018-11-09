@@ -11,15 +11,10 @@ import java.net.Socket;
  */
 class Client {
 
-    /** Socket the connection is hosted upon. */
     private Socket socket;
-    /** The host to connect to over the socket. */
     private String host;
-    /** Port in which the socket is hosted on. */
     private int port;
-    /** BufferedReader object for use within the class. */
     private BufferedReader br;
-    /** PrintWriter object for use within the class. */
     private PrintWriter pw;
 
     /**
@@ -71,7 +66,8 @@ class Client {
             String line = br.readLine();
             // print line out on the socket's output stream
             pw.println(line);
-            // flush the output stream so that the server gets message immediately
+            // flush the output stream so that the server gets message
+            // immediately
             pw.flush();
             // user has entered exit command
             if (line.equals(Configuration.EXIT_STRING)) {

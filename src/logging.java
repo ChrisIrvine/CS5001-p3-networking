@@ -7,8 +7,11 @@ import java.time.format.DateTimeFormatter;
  */
 abstract class logging {
 
+    private static String request = "";
     private static String response = "";
-    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern(
+            "dd/MM/yyyy HH:mm:ss"
+    );
 
     /**
      * Method to compile the Client request string into a readable format for
@@ -42,12 +45,19 @@ abstract class logging {
         return DTF.format(now) + "\n";
     }
 
+    /**
+     * Return the client request String for the log.
+     * @return - client request String
+     */
     static String getRequest() {
         return request;
     }
 
-    private static String request = "";
 
+    /**
+     * Return the server response String for the log.
+     * @return - server response String
+     */
     static String getResponse() {
         return response;
     }

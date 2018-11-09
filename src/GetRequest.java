@@ -10,7 +10,6 @@ class GetRequest extends ConnectionHandler {
     private byte[] body;
     private byte[] header;
 
-
     /**
      * Custom Constructor for the GetRequest class. Will extract the file to GET
      * from the request header, validate the file path and will proceed to
@@ -27,18 +26,30 @@ class GetRequest extends ConnectionHandler {
 
         if (reqFile.isFile()) {
             this.body = Request.compileBody(reqFile);
-            this.header = Request.compileHeader(true, reqFile, this.body.length);
+            this.header = Request.compileHeader(
+                    true, reqFile, this.body.length
+            );
         } else {
             //assume the file was not found, therefore generate 404 response
             this.body = Request.compileBody(notFound);
-            this.header = Request.compileHeader(false, reqFile, this.body.length);
+            this.header = Request.compileHeader(
+                    false, reqFile, this.body.length
+            );
         }
     }
 
+    /**
+     * Get the response body.
+     * @return - response body as byte array
+     */
     public byte[] getBody() {
         return body;
     }
 
+    /**
+     * Get the response header.
+     * @return - response header as byte array
+     */
     byte[] getHeader() {
         return header;
     }

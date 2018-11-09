@@ -14,15 +14,10 @@ import java.net.Socket;
  */
 class ConnectionHandler implements Runnable {
 
-    /** socket representing TCP/IP connection to Client. */
     private static Socket conn;
-    /** get data from client on this input stream. */
     private InputStream is;
-    /** can send data back to the client on this output stream. */
     private static OutputStream os;
-    /** use buffered reader to read client data. */
     private BufferedReader br;
-    /** directory from which files are served. */
     private static String dir;
 
     /**
@@ -102,13 +97,20 @@ class ConnectionHandler implements Runnable {
         ConnectionHandler.os = os;
     }
 
+    /**
+     * Runnable method for the ConnectionHandler class, triggers the
+     * printClientData() method. Will cleanup the socket upon the thread ending.
+     */
     @Override
     public void run() {
           System.out.println("new ConnectionHandler constructed .... ");
         try {
             printClientData();
-        } catch (Exception e) { // exit cleanly for any Exception (including IOException, ClientDisconnectedException)
-            System.out.println("ConnectionHandler.handleClientRequest: " + e.getMessage());
+        } catch (Exception e) {
+            // exit cleanly for any Exception (including IOException,
+            // ClientDisconnectedException)
+            System.out.println("ConnectionHandler.handleClientRequest: "
+                    + e.getMessage());
         } finally {
             cleanup();
         }
@@ -141,13 +143,15 @@ class ConnectionHandler implements Runnable {
     }
 
     /**
-     * Private method that will send the client data to be processed and will
-     * throw a DisconnectedException should there be an unexpected issue or the
-     * connection is closed by the client.
+     * Private method that effectively powers each request that is sent to the
+     * server. The first line of the request to the server is extracted and sent
+     * for processing, with different actions taken depending on a GET, HEAD or
+     * unknown request type (see process()). Once the server response has been
+     * compiled, the request and log is compiled and written.
      */
     private void printClientData() throws DisconnectedException, IOException {
         String line = br.readLine();
-        logging.compileRequest(line);
+        logging.compileRequest(line); //compile the request for the log
         byte[] response = process(line);
 
         //send response
@@ -155,15 +159,17 @@ class ConnectionHandler implements Runnable {
         os.flush();
         os.close();
 
-        //compile response and request for log
-        logging.compileRequest(line);
+        //compile response for the log
         logging.compileResponse(response);
 
         //write log
-        PrintWriter logger = new PrintWriter(new FileWriter(Configuration.LOG_FILE, true));
+        PrintWriter logger = new PrintWriter(new FileWriter(
+                Configuration.LOG_FILE, true
+        ));
 
         logger.write(logging.getRequest());
         logger.write(logging.getResponse());
+        logger.write(Configuration.BREAKER + Configuration.BREAKER);
 
         //close log
         logger.flush();
@@ -183,7 +189,7 @@ class ConnectionHandler implements Runnable {
      * should there be one, printed out to the console.
      */
     private void cleanup() {
-        System.out.println("ConnectionHandler: ... cleaning up and exiting ... ");
+        System.out.println("ConnectionHandler: ... cleaning up and exiting ...");
         try {
             br.close();
             is.close();

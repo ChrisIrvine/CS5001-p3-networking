@@ -27,6 +27,10 @@ class HeadRequest {
         }
     }
 
+    /**
+     * Return the response header.
+     * @return - response header as byte array
+     */
     byte[] getHeader() {
         return header;
     }

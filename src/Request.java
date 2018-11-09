@@ -5,6 +5,15 @@ import java.util.Objects;
 
 abstract class Request {
 
+    /**
+     * Method to return the file that is being requested from the client. The
+     * method makes the assumption that if the request has progressed through
+     * the server this far, the request is in the HTTP/1.1 standardised format
+     * and that a file name will always be returned. Should that not be the case
+     * null is returned.
+     * @param reqFile - requested file
+     * @return - File object representing the requested file
+     */
     static File grabFile(String reqFile) {
         int backslash;
         int end;
@@ -13,7 +22,9 @@ abstract class Request {
         if (reqFile.contains("/")) {
             backslash = reqFile.indexOf("/");
             end = reqFile.indexOf(" ", backslash);
-            filepath = ConnectionHandler.getDir() + reqFile.substring(backslash, end);
+            filepath = ConnectionHandler.getDir() + reqFile.substring(
+                    backslash, end
+            );
         }
 
         // we do not need to catch the NullPointerException as we can assume
@@ -68,6 +79,13 @@ abstract class Request {
         return fileContent;
     }
 
+    /**
+     * Method to combine the header and body byte arrays into a singular byte
+     * array called response.
+     * @param header - byte array representation of header response
+     * @param body - byte array representation of body response
+     * @return - combined response byte array
+     */
     static byte[] compileResponse(byte[] header, byte[] body) {
         byte[] response = new byte[header.length + body.length];
 
